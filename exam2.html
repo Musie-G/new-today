@@ -1,0 +1,536 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Bingo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #000;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #333;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .game-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .bingo-board {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .bingo-letters {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bingo-letter {
+            height: 60px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #ff4444;
+            margin: 2px 0;
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 4px;
+        }
+
+        .number {
+            aspect-ratio: 1;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .number.called {
+            background: #666;
+            color: #aaa;
+        }
+
+        .controls {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: #222;
+            border-radius: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        select, input {
+            padding: 0.5rem;
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #ff4444;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #444;
+            color: white;
+        }
+
+        .winner-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .winner-display.active {
+            display: block;
+            animation: popIn 0.5s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-box {
+            background: #222;
+            padding: 1rem;
+            border-radius: 4px;
+            min-width: 150px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .modern-logo {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 100px;
+            height: 100px;
+            background: #00ff00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-align: center;
+            line-height: 1.2;
+            color: #000;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ff4444'/></svg>" alt="Logo">
+            <h1>Modern Bingo</h1>
+        </div>
+        <div class="user-info">
+            <span>Welcome, <span id="username">Player</span></span>
+            <button class="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Total Calls</div>
+                <div class="stat-value" id="totalCalls">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Previous Call</div>
+                <div class="stat-value" id="previousCall">-</div>
+            </div>
+        </div>
+
+        <div class="bingo-board">
+            <div class="bingo-letters">
+                <div class="bingo-letter">B</div>
+                <div class="bingo-letter">I</div>
+                <div class="bingo-letter">N</div>
+                <div class="bingo-letter">G</div>
+                <div class="bingo-letter">O</div>
+            </div>
+            <div class="numbers-grid" id="numbersGrid"></div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Caller Selection</label>
+                <select id="callerVoice">
+                    <option value="en">English</option>
+                    <option value="am">Amharic</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Autoplay Speed</label>
+                <select id="autoplaySpeed">
+                    <option value="5">5 seconds</option>
+                    <option value="10" selected>10 seconds</option>
+                    <option value="15">15 seconds</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Board Number</label>
+                <input type="number" id="boardNumber" min="0">
+            </div>
+            <div class="control-group">
+                <button class="btn btn-primary" id="startAutoplay">Start AutoPlay</button>
+                <button class="btn btn-secondary" id="shuffleBoard">Shuffle board</button>
+            </div>
+            <div class="control-group">
+                <button class="btn btn-primary" id="checkWinner">Check</button>
+                <button class="btn btn-secondary" id="newGame">Start New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="winner-display" id="winnerDisplay">
+        <h2>WINNER!</h2>
+        <p>Prize: <span id="prizeAmount">50</span> Birr</p>
+    </div>
+
+    <div class="modern-logo">
+        Modern<br>Bingo
+    </div>
+
+    <script>
+           // Game state
+   let calledNumbers = new Set();
+   let autoplayInterval = null;
+   let gameActive = false;
+
+   // Audio context for sound effects
+  
+   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+   // Add this to the existing JavaScript code, replace the previous playNumberSound function
+
+
+
+
+
+
+   // Create an AudioManager to handle sounds
+const AudioManager = {
+    sounds: {},
+
+    // Initialize audio files (numbers + effects)
+    async init(voiceType = 'amharic') {
+        const loadPromises = [];
+        this.sounds = {};
+
+        // Load number sounds (1-75)
+        for (let i = 1; i <= 75; i++) {
+            const audioPath = `audio/${voiceType}/${i}.mp3`;
+            this.sounds[i] = new Audio(audioPath);
+            loadPromises.push(this._loadAudio(this.sounds[i]));
+        }
+
+        // Load effect sounds
+        const effects = ['winner', 'click', 'gameStart'];
+        effects.forEach(effect => {
+            const audioPath = `audio/effects/${effect}.mp3`;
+            this.sounds[effect] = new Audio(audioPath);
+            loadPromises.push(this._loadAudio(this.sounds[effect]));
+        });
+
+        // Wait for all audio files to be loaded
+        try {
+            await Promise.all(loadPromises);
+            console.log('All audio files loaded successfully');
+        } catch (error) {
+            console.error('Error loading audio files:', error);
+        }
+    },
+
+    // Helper function to preload audio
+    _loadAudio(audio) {
+        return new Promise((resolve, reject) => {
+            audio.addEventListener('canplaythrough', resolve, { once: true });
+            audio.addEventListener('error', reject, { once: true });
+            audio.load();
+        });
+    },
+
+    // Play number sound
+    playNumber(num) {
+        if (this.sounds[num]) {
+            this._playSound(this.sounds[num]);
+        } else {
+            console.error(`Sound for number ${num} not found!`);
+        }
+    },
+
+    // Play effect sound
+    playSound(effect) {
+        if (this.sounds[effect]) {
+            this._playSound(this.sounds[effect]);
+        } else {
+            console.error(`Effect sound "${effect}" not found!`);
+        }
+    },
+
+    // Play sound with error handling
+    _playSound(audio) {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.play()
+            .catch(err => console.error('Error playing audio:', err));
+    }
+};
+// Create an audio manager object to handle sounds
+
+
+// Add this to the AudioManager object
+
+
+// Modified init function with preloading
+document.addEventListener('DOMContentLoaded', () => {
+    // Trigger initialization only after user interaction
+    document.body.addEventListener('click', async () => {
+        await AudioManager.init('en'); // Default voice is English
+        console.log('Audio initialized!');
+    }, { once: true }); // Ensures it's run only once
+});
+
+
+function playNumberSound(num) {
+    const oscillator = audioContext.createOscillator();
+    // Your old sound generation logic here
+}
+
+    
+    // Load effect sounds
+    
+    // Play number sound
+
+
+// Replace the existing playNumberSound function with this:
+function playNumberSound(num) {
+    AudioManager.playNumber(num);
+}
+
+
+
+AudioManager.playSound('gameStart');
+
+// Add voice selection functionality
+
+// Initialize audio when the page loads
+
+   // Initialize the game board
+   function initializeBoard() {
+       const grid = document.getElementById('numbersGrid');
+       grid.innerHTML = '';
+       for (let i = 1; i <= 75; i++) {
+           const number = document.createElement('div');
+           number.className = 'number';
+           number.textContent = i;
+           number.addEventListener('click', () => toggleNumber(i));
+           grid.appendChild(number);
+       }
+   }
+
+   // Toggle number selection
+   function toggleNumber(num) {
+       if (!gameActive) return;
+       const numbers = document.querySelectorAll('.number');
+       numbers[num - 1].classList.toggle('called');
+       if (calledNumbers.has(num)) {
+           calledNumbers.delete(num);
+       } else {
+           calledNumbers.add(num);
+           playNumberSound(num);
+       }
+       updateStats();
+   }
+
+   // Play sound for number
+   function playNumberSound(num) {
+       const oscillator = audioContext.createOscillator();
+       const gainNode = audioContext.createGain();
+       
+       oscillator.connect(gainNode);
+       gainNode.connect(audioContext.destination);
+       
+       oscillator.frequency.setValueAtTime(440 + (num * 10), audioContext.currentTime);
+       gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+       
+       oscillator.start();
+       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+       oscillator.stop(audioContext.currentTime + 0.5);
+   }
+
+   // Update statistics
+   function updateStats() {
+       document.getElementById('totalCalls').textContent = calledNumbers.size;
+       const lastCall = Array.from(calledNumbers).pop() || '-';
+       document.getElementById('previousCall').textContent = lastCall;
+   }
+
+   // Autoplay functionality
+   function toggleAutoplay() {
+       const button = document.getElementById('startAutoplay');
+       if (autoplayInterval) {
+           clearInterval(autoplayInterval);
+           autoplayInterval = null;
+           button.textContent = 'Start AutoPlay';
+       } else {
+           const speed = parseInt(document.getElementById('autoplaySpeed').value) * 1000;
+           autoplayInterval = setInterval(callRandomNumber, speed);
+           button.textContent = 'Stop AutoPlay';
+       }
+   }
+
+   // Call random number
+   function callRandomNumber() {
+       if (calledNumbers.size >= 75) return;
+       let num;
+       do {
+           num = Math.floor(Math.random() * 75) + 1;
+       } while (calledNumbers.has(num));
+       toggleNumber(num);
+   }
+
+   // Check winner
+   function checkWinner() {
+       const patterns = [
+           // Horizontal lines
+           [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14],
+           // Vertical lines
+           [0,5,10], [1,6,11], [2,7,12], [3,8,13], [4,9,14],
+           // Diagonals
+           [0,6,12], [4,8,12]
+       ];
+
+       // Implement winning pattern check logic here
+       document.getElementById('winnerDisplay').classList.add('active');
+       setTimeout(() => {
+           document.getElementById('winnerDisplay').classList.remove('active');
+       }, 3000);
+   }
+
+   // Event listeners
+   document.getElementById('startAutoplay').addEventListener('click', toggleAutoplay);
+   document.getElementById('checkWinner').addEventListener('click', checkWinner);
+   document.getElementById('newGame').addEventListener('click', () => {
+       calledNumbers.clear();
+       initializeBoard();
+       updateStats();
+       gameActive = true;
+   });
+   document.getElementById('shuffleBoard').addEventListener('click', () => {
+       calledNumbers.clear();
+       initializeBoard();
+       updateStats();
+   });
+
+   // Initialize game
+   initializeBoard();
+   gameActive = true;
+    </script>
+</body>
+</html>

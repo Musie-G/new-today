@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Bingo</title>
+    <!-- Adding required external libraries -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a2c2a;
+            --secondary-color: #943232;
+            --accent-color: #ff6b6b;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+        }
+
+        body {
+            background-color: var(--primary-color);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animation Background */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+            }
+            100% {
+                transform: translateY(-100px) scale(1);
+            }
+        }
+
+        /* Enhanced Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(26, 44, 42, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        /* Enhanced User Section */
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            color: var(--text-light);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            background-color: var(--secondary-color);
+            color: var(--text-light);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .logout-btn:hover {
+            background-color: #7a2828;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Enhanced Game Container */
+        .game-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Game Settings Cards */
+        .game-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .setting-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .setting-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .setting-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--secondary-color);
+        }
+
+        /* Enhanced Number Grid */
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 2.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .number-btn {
+            aspect-ratio: 1;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.1),
+                       -4px -4px 8px rgba(255,255,255,0.1);
+        }
+
+        .number-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 6px 6px 12px rgba(0,0,0,0.15),
+                       -6px -6px 12px rgba(255,255,255,0.15);
+        }
+
+        .number-btn.selected {
+            background: var(--accent-color);
+            color: var(--text-light);
+            transform: scale(0.95);
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Game Board Styles */
+        .game-board {
+            display: none;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .board-container {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 0.8rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+
+        .board-number {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .board-number.called {
+            background: var(--accent-color);
+            transform: scale(0.95);
+            animation: pulse 1s;
+        }
+
+        /* Custom Pattern Modal */
+        .pattern-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 90%;
+            width: 500px;
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .pattern-cell {
+            aspect-ratio: 1;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pattern-cell.selected {
+            background: var(--accent-color);
+        }
+
+        /* Sound Controls */
+        .sound-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sound-controls:hover {
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Winner Animation */
+        .winner-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            animation: fadeIn 0.5s;
+        }
+
+        .winner-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--text-light);
+            animation: winner 1s infinite;
+        }
+
+        @keyframes winner {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-settings {
+                grid-template-columns: 1fr;
+            }
+
+            .number-grid {
+                grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+            }
+
+            .board-container {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-background" id="animatedBackground"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <img src="https://picsum.photos/45/45?random=1" alt="Modern Bingo Logo">
+            <h1>Modern Bingo</h1>
+        </div>
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-avatar">L</div>
+                <span>Welcome, Lidiya</span>
+            </div>
+            <button class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Setup Page -->
+    <div class="game-container" id="setup-page">
+        <div class="game-settings">
+            <div class="setting-card">
+                <h3>Game Number</h3>
+                <div class="game-number">
+                    <span id="currentGame">1</span>
+                    <small>2/100</small>
+                </div>
+            </div>
+            <div class="setting-card">
+                <h3>Game Bid</h3>
+                <div class="bid-control">
+                    <input type="number" value="100" min="1" max="1000" id="gameBid">
+                </div>
+            </div>
+            <div class="setting-card">
+                <h3>Difficulty</h3>
+                <select id="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            <div class="setting-card">
+                <h3>Custom Pattern</h3>
+                <button onclick="showPatternModal()" class="pattern-btn">
+                    Create Pattern
+                </button>
+            </div>
+        </div>
+
+        <div class="number-grid" id="numberGrid"></div>
+
+        <button class="create-game-btn" onclick="startGame()">
+            Create Game
+        </button>
+    </div>
+
+    <!-- Game Board Page -->
+    <div class="game-board" id="game-page">
+        <!-- Game Info Section -->
+        <div class="game-info">
+            <div class="info-card">
+                <h3>Total Calls</h3>
+                <span id="totalCalls">0</span>
+            </div>
+            <div class="info-card">
+                <h3>Previous Call</h3>
+                <span id="previousCall">-</span>
+            </div>
+        </div>
+
+        <!-- Bingo Board -->
+        <div class="board-wrapper">
+            <div id="bingo-text">BINGO</div>
+            <div class="board-container" id="bingoBoard"></div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <select id="callerSelection">
+                    <option>Amharic Men Modern - Default</option>
+                </select>
+                <div class="speed-control">
+                    <label>Autoplay Speed</label>
+                    <input type="range" min="1" max="100" value="50" id="autoplaySpeed">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button onclick="startAutoPlay()" id="autoplayBtn">Start AutoPlay</button>
+                <button onclick="startNewGame()">Start New Game</button>
+            </div>
+
+            <div class="check-group">
+                <input type="number" placeholder="Board Number" id="boardNumber" value="0">
+                <button onclick="checkBoard()">Check</button>
+            </div>
+
+            <div class="prize-display">
+                <h3>WINNER PRIZE</h3>
+                <h2>48 Birr</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pattern Modal -->
+    <div class="pattern-modal" id="patternModal">
+        <h2>Create Custom Pattern</h2>
+        <div class="pattern-grid" id="patternGrid"></div>
+        <button onclick="savePattern()">Save Pattern</button>
+        <button onclick="closePatternModal()">Cancel</button>
+    </div>
+
+    <!-- Sound Controls -->
+    <div class="sound-controls" onclick="toggleSound()" id="soundToggle">
+        <i class="fas fa-volume-up"></i>
+    </div>
+
+    <!-- Winner Overlay -->
+    <div class="winner-overlay" id="winnerOverlay">
+        <div class="winner-content">
+            <h1>BINGO!</h1>
+            <h2>Congratulations!</h2>
+            <p>You've won 48 Birr</p>
+        </div>
+    </div>
+
+    <script>
+        // Sound Effects
+        const sounds = {
+            numberCalled: new Audio('path_to_sound/number_called.mp3'),
+            winner: new Audio('path_to_sound/winner.mp3'),
+            click: new Audio('path_to_sound/click.mp3')
+        };
+
+        let soundEnabled = true;
+        let autoplayInterval;
+        let calledNumbers = new Set();
+        let currentPattern = [];
+
+        // Initialize animated background
+        function createParticles() {
+            const background = document.getElementById('animatedBackground');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.width = particle.style.height = Math.random() * 5 + 'px';
+                background.appendChild(particle);
+            }
+        }
+
+        // Initialize number grid
+        function initializeNumberGrid() {
+            const grid = document.getElementById('numberGrid');
+            for (let i = 1; i <= 100; i++) {
+                const button = document.createElement('button');
+                button.className = 'number-btn';
+                button.textContent = i;
+                button.onclick = () => {
+                    button.classList.toggle('selected');
+                    playSound('click');
+                };
+                grid.appendChild(button);
+            }
+        }
+
+        // Initialize bingo board
+        function initializeBingoBoard() {
+            const board = document.getElementById('bingoBoard');
+            for (let i = 1; i <= 75; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'board-number';
+                cell.textContent = i;
+                cell.onclick = () => toggleNumber(i);
+                board.appendChild(cell);
+            }
+        }
+
+        // Game Logic
+        function toggleNumber(number) {
+            if (!calledNumbers.has(number)) {
+                calledNumbers.add(number);
+                playSound('numberCalled');
+                updateBoard();
+                checkWinner();
+            }
+        }
+
+        function startAutoPlay() {
+            const btn = document.getElementById('autoplayBtn');
+            if (btn.textContent === 'Start AutoPlay') {
+                btn.textContent = 'Stop AutoPlay';
+                autoplayInterval = setInterval(() => {
+                    callRandomNumber();
+                }, getAutoplaySpeed());
+            } else {
+                stopAutoPlay();
+            }
+        }
+
+        function stopAutoPlay() {
+            clearInterval(autoplayInterval);
+            document.getElementById('autoplayBtn').textContent = 'Start AutoPlay';
+        }
+
+        function callRandomNumber() {
+            const available = Array.from({length: 75}, (_, i) => i + 1)
+                .filter(n => !calledNumbers.has(n));
+            
+            if (available.length > 0) {
+                const number = available[Math.floor(Math.random() * available.length)];
+                toggleNumber(number);
+            } else {
+                stopAutoPlay();
+            }
+        }
+
+        function checkWinner() {
+            // Implement winning patterns check
+            const patterns = [
+                // Horizontal lines
+                [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14],
+                // Vertical lines
+                [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22],
+                // Diagonals
+                [0,6,12,18,24], [4,8,12,16,20]
+            ];
+
+            // Check if any pattern is complete
+            for (let pattern of patterns) {
+                if (pattern.every(pos => calledNumbers.has(pos))) {
+                    showWinner();
+                    return;
+                }
+            }
+        }
+
+        function showWinner() {
+            document.getElementById('winnerOverlay').style.display = 'block';
+            playSound('winner');
+            stopAutoPlay();
+        }
+
+        // Pattern Modal Functions
+        function showPatternModal() {
+            document.getElementById('patternModal').style.display = 'block';
+        }
+
+        function closePatternModal() {
+            document.getElementById('patternModal').style.display = 'none';
+        }
+
+        function savePattern() {
+            // Save the current pattern
+            currentPattern = Array.from(document.querySelectorAll('.pattern-cell.selected'))
+                .map(cell => parseInt(cell.dataset.index));
+            closePatternModal();
+        }
+
+        // Utility Functions
+        function playSound(soundName) {
+            if (soundEnabled && sounds[soundName]) {
+                sounds[soundName].play();
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.querySelector('.sound-controls i');
+            icon.className = soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+        }
+
+        function getAutoplaySpeed() {
+            const speed = document.getElementById('autoplaySpeed').value;
+            return 3000 - (speed * 25); // 1-3 seconds based on slider
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            initializeNumberGrid();
+            initializeBingoBoard();
+        });
+
+        // Navigation Functions
+        function startGame() {
+            document.getElementById('setup-page').style.display = 'none';
+            document.getElementById('game-page').style.display = 'block';
+            calledNumbers.clear();
+            updateBoard();
+        }
+
+        function startNewGame() {
+            document.getElementById('setup-page').style.display = 'block';
+            document.getElementById('game-page').style.display = 'none';
+            stopAutoPlay();
+            calledNumbers.clear();
+        }
+
+        function updateBoard() {
+            document.getElementById('totalCalls').textContent = calledNumbers.size;
+            const lastCalled = Array.from(calledNumbers).pop();
+            document.getElementById('previousCall').textContent = lastCalled || '-';
+            
+            document.querySelectorAll('.board-number').forEach(cell => {
+                const number = parseInt(cell.textContent);
+                if (calledNumbers.has(number)) {
+                    cell.classList.add('called');
+                } else {
+                    cell.classList.remove('called');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

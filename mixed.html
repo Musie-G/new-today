@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Bingo</title>
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1f1f1f;
+            color: #fff;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: #111;
+            height: 100vh;
+            width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .sidebar h1 {
+            color: #f07b3f;
+            font-size: 24px;
+            margin: 0 0 20px;
+            text-align: center;
+        }
+        .sidebar .reports {
+            margin-top: auto;
+            text-align: center;
+        }
+        .sidebar .reports a {
+            color: #999;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        /* Main Layout */
+        .main-container {
+            margin-left: 220px;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header .game-info {
+            display: flex;
+            gap: 40px;
+        }
+        .header .game-info div {
+            text-align: center;
+            background: #333;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .header .game-info h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .header .user {
+            text-align: right;
+        }
+        .header .user span {
+            font-weight: bold;
+        }
+        .header button {
+            background: #b00;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        /* Bingo Grid */
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+        }
+        .bingo-grid button {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            color: black;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .bingo-grid button.selected {
+            background: #f07b3f;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Footer Buttons */
+        .footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .footer button {
+            background: #b00;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h1>Modern Bingo</h1>
+        <div class="reports">
+            <a href="#">Reports</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="game-info">
+                <div>
+                    <h3>Game Number</h3>
+                    <span id="gameNumber">1</span>
+                </div>
+                <div>
+                    <h3>Game Bid</h3>
+                    <input type="number" id="gameBid" value="20" min="1" max="1000" style="width: 60px; text-align: center;">
+                </div>
+                <div>
+                    <h3>Difficulty</h3>
+                    <span>Medium</span>
+                </div>
+                <div>
+                    <h3>Custom Pattern</h3>
+                    <span>1 line</span>
+                </div>
+            </div>
+            <div class="user">
+                <span>Welcome, Lidiya</span>
+                <button>Logout</button>
+            </div>
+        </div>
+
+        <!-- Bingo Grid -->
+        <div class="bingo-grid" id="bingoGrid">
+            <!-- Numbers 1 to 100 will be populated here -->
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="footer">
+            <button onclick="clearGrid()">Clear cards</button>
+            <button onclick="createGame()">Create game</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const bingoGrid = document.getElementById('bingoGrid');
+        let selectedNumbers = new Set();
+
+        // Generate Bingo Numbers
+        function generateGrid() {
+            for (let i = 1; i <= 100; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.addEventListener('click', () => toggleSelection(button, i));
+                bingoGrid.appendChild(button);
+            }
+        }
+
+        // Toggle Button Selection
+        function toggleSelection(button, number) {
+            if (selectedNumbers.has(number)) {
+                selectedNumbers.delete(number);
+                button.classList.remove('selected');
+            } else {
+                selectedNumbers.add(number);
+                button.classList.add('selected');
+            }
+        }
+
+        // Clear Grid Selection
+        function clearGrid() {
+            selectedNumbers.clear();
+            document.querySelectorAll('.bingo-grid button').forEach(button => button.classList.remove('selected'));
+        }
+
+        // Create Game Action
+        function createGame() {
+            const bid = document.getElementById('gameBid').value;
+            alert(`Game created with bid ${bid} and ${selectedNumbers.size} selected numbers.`);
+        }
+
+        // Initialize Grid
+        generateGrid();
+    </script>
+</body>
+</html>
